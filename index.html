@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6554c0">
+<meta name="description" content="AI、パソコン、美容、ファッション、旅行など暮らしに役立つ商品やサービスを探せるおトク発見ナビ。">
+<title>おトク発見ナビ｜あなたにぴったりのお得を発見</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
+ color:#29283b;
+ background:#f7f7fc;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+header{
+ background:#fff;
+ padding:15px;
+ position:sticky;
+ top:0;
+ z-index:10;
+ box-shadow:0 2px 12px #2221;
+}
+.wrap{max-width:1000px;margin:auto}
+.logo{font-size:23px;font-weight:900;color:#6554c0}
+.logo span{color:#ff927d}
+.sublogo{font-size:11px;color:#888;margin-top:3px}
+.hero{
+ margin:18px 13px;
+ padding:27px 20px;
+ border-radius:22px;
+ color:white;
+ background:linear-gradient(135deg,#6554c0,#a18ee9);
+}
+.hero h1{font-size:26px;line-height:1.5;margin:0 0 10px}
+.hero p{font-size:13px;line-height:1.8;margin:0}
+.search{
+ display:flex;
+ gap:7px;
+ margin-top:20px;
+ background:white;
+ border-radius:12px;
+ padding:6px;
+}
+.search input{
+ flex:1;
+ min-width:0;
+ border:0;
+ outline:0;
+ padding:10px;
+ color:#333;
+}
+.search button{
+ border:0;
+ background:#ff927d;
+ color:white;
+ font-weight:bold;
+ border-radius:9px;
+ padding:0 17px;
+}
+main{max-width:1000px;margin:auto;padding:0 13px 40px}
+.section-title{font-size:19px;font-weight:800;margin:27px 0 14px}
+.categories{
+ display:flex;
+ gap:8px;
+ overflow-x:auto;
+ padding:2px 0 10px;
+}
+.cat{
+ flex-shrink:0;
+ border:1px solid #e7e5ef;
+ background:white;
+ color:#555;
+ border-radius:30px;
+ padding:10px 14px;
+ font-size:12px;
+}
+.cat.active{background:#6554c0;color:white;border-color:#6554c0}
+.toolbar{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:10px;
+ margin:12px 0;
+}
+.toolbar select{
+ background:white;
+ border:1px solid #ddd;
+ border-radius:9px;
+ padding:9px;
+ color:#444;
+}
+.toolbar button{
+ border:0;
+ border-radius:9px;
+ padding:9px 12px;
+ background:#fff0f1;
+ color:#db6279;
+ font-size:12px;
+}
+.grid{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:12px;
+}
+.card{
+ background:white;
+ border:1px solid #eeeef4;
+ border-radius:16px;
+ padding:12px;
+ min-width:0;
+}
+.product-image{
+ height:105px;
+ display:grid;
+ place-items:center;
+ border-radius:12px;
+ background:linear-gradient(135deg,#f0edff,#fff0ed);
+ font-size:43px;
+}
+.tag{
+ display:inline-block;
+ margin-top:10px;
+ padding:4px 8px;
+ background:#f0edff;
+ color:#6554c0;
+ border-radius:20px;
+ font-size:10px;
+}
+.card h3{font-size:14px;line-height:1.5;margin:8px 0}
+.card p{font-size:11px;line-height:1.7;color:#777;margin:0}
+.card-actions{
+ display:flex;
+ gap:6px;
+ margin-top:12px;
+}
+.detail-btn{
+ flex:1;
+ border:0;
+ border-radius:9px;
+ background:#6554c0;
+ color:white;
+ padding:9px 5px;
+ font-size:11px;
+ font-weight:bold;
+}
+.fav-btn{
+ border:0;
+ border-radius:9px;
+ background:#fff0f1;
+ color:#e56c83;
+ padding:8px 11px;
+ font-size:17px;
+}
+.rank-number{font-size:11px;color:#ff8a70;font-weight:bold}
+.empty{
+ grid-column:1/-1;
+ text-align:center;
+ background:white;
+ padding:30px 15px;
+ border-radius:14px;
+ color:#777;
+ font-size:13px;
+}
+.notice{
+ margin:20px 0;
+ padding:13px;
+ border-radius:12px;
+ background:#fff;
+ color:#888;
+ font-size:11px;
+ line-height:1.8;
+}
+.modal-bg{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:30;
+ background:#0008;
+ padding:18px;
+ align-items:center;
+ justify-content:center;
+}
+.modal-bg.show{display:flex}
+.modal{
+ background:white;
+ border-radius:18px;
+ width:100%;
+ max-width:430px;
+ padding:22px;
+ max-height:85vh;
+ overflow:auto;
+}
+.modal h2{font-size:19px}
+.modal p{font-size:13px;line-height:1.9;color:#666}
+.modal-close{
+ float:right;
+ border:0;
+ background:#eee;
+ border-radius:50%;
+ width:32px;
+ height:32px;
+}
+.modal-link{
+ display:block;
+ text-align:center;
+ margin-top:18px;
+ padding:13px;
+ border-radius:10px;
+ background:#6554c0;
+ color:white;
+ text-decoration:none;
+ font-size:13px;
+}
+footer{
+ background:#29283b;
+ color:#ddd;
+ padding:27px 15px;
+ font-size:12px;
+ line-height:2;
+ text-align:center;
+}
+footer a{color:#ddd}
+@media(min-width:650px){
+ .hero{margin:25px auto;padding:45px}
+ .hero h1{font-size:34px}
+ .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+ .product-image{height:135px}
+}
+@media(min-width:900px){
+ .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+</style>
+</head>
+
+<body>
+<header>
+ <div class="wrap">
+  <div class="logo">おトク発見<span>ナビ</span></div>
+  <div class="sublogo">毎日の暮らしに、ちょっといい発見を。</div>
+ </div>
+</header>
+
+<section class="hero wrap">
+ <h1>あなたにぴったりの<br>おトクを見つけよう！</h1>
+ <p>AI・パソコン・美容・旅行まで。<br>気になる商品や便利なサービスを探してみよう。</p>
+ <div class="search">
+  <input id="searchInput" type="search" placeholder="商品・サービスを検索">
+  <button id="searchBtn">検索</button>
+ </div>
+</section>
+
+<main>
+ <h2 class="section-title">カテゴリーから探す</h2>
+ <div class="categories" id="categories"></div>
+
+ <div class="toolbar">
+  <strong id="resultTitle">おすすめ情報</strong>
+  <select id="sortSelect" aria-label="表示順">
+   <option value="recommended">おすすめ順</option>
+   <option value="name">名前順</option>
+  </select>
+ </div>
+
+ <div class="grid" id="productGrid"></div>
+
+ <div class="notice">
+  ※掲載内容はデモ用のサンプルです。商品名・説明・リンクは公開前に確認し、実際の情報に差し替えてください。価格やランキングを実績として表示しているものではありません。
+ </div>
+</main>
+
+<div class="modal-bg" id="modalBg">
+ <div class="modal">
+  <button class="modal-close" id="closeModal" aria-label="閉じる">×</button>
+  <div id="modalContent"></div>
+ </div>
+</div>
+
+<footer>
+ <div class="wrap">
+  <strong>おトク発見ナビ</strong><br>
+  あなたの暮らしに役立つ情報をお届けします。<br>
+  <p>掲載情報は確認のうえご利用ください。</p>
+  <p>© 2026 おトク発見ナビ</p>
+ </div>
+</footer>
+
+<script>
+const products = [
+ {id:1,name:"AI文章作成ツール",category:"AI・便利ツール",icon:"🤖",description:"文章作成やアイデア出しを効率化するAIサービス。",rank:1,link:""},
+ {id:2,name:"AI画像生成ツール",category:"AI・便利ツール",icon:"🎨",description:"イラストや画像づくりに役立つサービス。",rank:2,link:""},
+ {id:3,name:"便利なAIサービス",category:"AI・便利ツール",icon:"✨",description:"毎日の作業をサポートする便利なAIを紹介。",rank:3,link:""},
+ {id:4,name:"パソコン周辺機器",category:"パソコン・家電",icon:"💻",description:"パソコン作業を快適にするアイテム。",rank:1,link:""},
+ {id:5,name:"ワイヤレスイヤホン",category:"パソコン・家電",icon:"🎧",description:"通勤や作業中に便利なオーディオ用品。",rank:2,link:""},
+ {id:6,name:"便利なキッチン家電",category:"パソコン・家電",icon:"🍳",description:"毎日の家事を助ける便利な家電。",rank:3,link:""},
+ {id:7,name:"人気スキンケア",category:"美容・ファッション",icon:"🧴",description:"毎日の美容習慣に取り入れたいアイテム。",rank:1,link:""},
+ {id:8,name:"レディースファッション",category:"美容・ファッション",icon:"👗",description:"普段使いからお出かけまで楽しめる服。",rank:2,link:""},
+ {id:9,name:"便利な生活グッズ",category:"生活・便利グッズ",icon:"🏠",description:"毎日の暮らしをちょっと便利にする商品。",rank:1,link:""},
+ {id:10,name:"お掃除便利アイテム",category:"生活・便利グッズ",icon:"🧹",description:"お掃除を手軽にする便利グッズ。",rank:2,link:""},
+ {id:11,name:"おすすめホテル予約",category:"旅行・ホテル",icon:"🏨",description:"旅行や出張の宿泊先探しに役立つサービス。",rank:1,link:""},
+ {id:12,name:"旅行便利グッズ",category:"旅行・ホテル",icon:"🧳",description:"旅行を快適に楽しむためのアイテム。",rank:2,link:""}
+];
+
+const categoryList = [
+ "すべて",
+ "AI・便利ツール",
+ "パソコン・家電",
+ "美容・ファッション",
+ "生活・便利グッズ",
+ "旅行・ホテル",
+ "お気に入り"
+];
+
+let selectedCategory = "すべて";
+let favorites = JSON.parse(localStorage.getItem("otokuFavorites") || "[]");
+
+const categories = document.getElementById("categories");
+const grid = document.getElementById("productGrid");
+const searchInput = document.getElementById("searchInput");
+const resultTitle = document.getElementById("resultTitle");
+
+function makeCategories(){
+ categories.innerHTML = "";
+ categoryList.forEach(category=>{
+  const button = document.createElement("button");
+  button.className = "cat" + (selectedCategory === category ? " active" : "");
+  button.textContent = category === "お気に入り" ? "♥ お気に入り" : category;
+  button.addEventListener("click",()=>{
+   selectedCategory = category;
+   makeCategories();
+   render();
+  });
+  categories.appendChild(button);
+ });
+}
+
+function render(){
+ const word = searchInput.value.trim().toLowerCase();
+ let list = products.filter(product=>{
+  const categoryMatch =
+   selectedCategory === "すべて" ||
+   (selectedCategory === "お気に入り"
+    ? favorites.includes(product.id)
+    : product.category === selectedCategory);
+  const textMatch =
+   (product.name + product.category + product.description)
+   .toLowerCase().includes(word);
+  return categoryMatch && textMatch;
+ });
+
+ if(document.getElementById("sortSelect").value === "name"){
+  list.sort((a,b)=>a.name.localeCompare(b.name,"ja"));
+ }else{
+  list.sort((a,b)=>a.rank-b.rank || a.id-b.id);
+ }
+
+ resultTitle.textContent =
+  (selectedCategory === "すべて" ? "おすすめ情報" : selectedCategory)
+  + "（" + list.length + "件）";
+
+ grid.innerHTML = "";
+
+ if(list.length === 0){
+  grid.innerHTML = '<div class="empty">該当する情報がありません。<br>別のキーワードで検索してみてください。</div>';
+  return;
+ }
+
+ list.forEach(product=>{
+  const card = document.createElement("article");
+  card.className = "card";
+  const isFavorite = favorites.includes(product.id);
+
+  card.innerHTML = `
+   <div class="product-image">${product.icon}</div>
+   <span class="tag">${product.category}</span>
+   <div class="rank">おすすめ ${product.rank}位</div>
+   <h3>${product.name}</h3>
+   <p>${product.description}</p>
+   <div class="card-actions">
+    <button class="detail-btn" data-detail="${product.id}">詳細を見る</button>
+    <button class="fav-btn" data-fav="${product.id}" aria-label="お気に入り">
+     ${isFavorite ? "♥" : "♡"}
+    </button>
+   </div>
+  `;
+  grid.appendChild(card);
+ });
+
+ grid.querySelectorAll("[data-detail]").forEach(button=>{
+  button.addEventListener("click",()=>showDetail(Number(button.dataset.detail)));
+ });
+ grid.querySelectorAll("[data-fav]").forEach(button=>{
+  button.addEventListener("click",()=>toggleFavorite(Number(button.dataset.fav)));
+ });
+}
+
+function toggleFavorite(id){
+ if(favorites.includes(id)){
+  favorites = favorites.filter(item=>item !== id);
+ }else{
+  favorites.push(id);
+ }
+ localStorage.setItem("otokuFavorites",JSON.stringify(favorites));
+ render();
+}
+
+function showDetail(id){
+ const product = products.find(item=>item.id === id);
+ if(!product)return;
+
+ const linkArea = product.link
+  ? `<a class="modal-link" href="${product.link}" target="_blank" rel="noopener noreferrer sponsored">公式・紹介ページを見る</a>`
+  : `<p style="padding:12px;background:#f7f6fc;border-radius:10px">紹介リンクはまだ登録されていません。公開前に広告主・公式サイトの正しいURLを設定してください。</p>`;
+
+ document.getElementById("modalContent").innerHTML = `
+  <div style="font-size:42px">${product.icon}</div>
+  <span class="tag">${product.category}</span>
+  <h2>${product.name}</h2>
+  <p>${product.description}</p>
+  <p>このページは商品・サービスを紹介するためのデモページです。購入や申込みの前に、提供元の公式情報をご確認ください。</p>
+  ${linkArea}
+ `;
+ document.getElementById("modalBg").classList.add("show");
+}
+
+document.getElementById("searchBtn").addEventListener("click",render);
+searchInput.addEventListener("input",render);
+document.getElementById("sortSelect").addEventListener("change",render);
+document.getElementById("closeModal").addEventListener("click",()=>{
+ document.getElementById("modalBg").classList.remove("show");
+});
+document.getElementById("modalBg").addEventListener("click",event=>{
+ if(event.target.id === "modalBg"){
+  event.currentTarget.classList.remove("show");
+ }
+});
+
+makeCategories();
+render();
+</script>
+</body>
+</html>
