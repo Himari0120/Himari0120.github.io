@@ -293,7 +293,9 @@ footer a{color:#ddd}
 <script>
 const products = (window.PRODUCTS || []).map(p => ({
   console.log("商品データ:", window.PRODUCTS);
-  alert("商品データ件数：" + (window.PRODUCTS || []).length);
+alert("商品データ件数：" + (window.PRODUCTS || []).length);
+
+const products = (window.PRODUCTS || []).map(p => ({
   ...p,
   icon: p.icon || "🛍️",
   rank: p.rank || 99,
