@@ -291,20 +291,12 @@ footer a{color:#ddd}
 </footer>
 
 <script>
-const products = [
- {id:1,name:"AI文章作成ツール",category:"AI・便利ツール",icon:"🤖",description:"文章作成やアイデア出しを効率化するAIサービス。",rank:1,link:""},
- {id:2,name:"AI画像生成ツール",category:"AI・便利ツール",icon:"🎨",description:"イラストや画像づくりに役立つサービス。",rank:2,link:""},
- {id:3,name:"便利なAIサービス",category:"AI・便利ツール",icon:"✨",description:"毎日の作業をサポートする便利なAIを紹介。",rank:3,link:""},
- {id:4,name:"パソコン周辺機器",category:"パソコン・家電",icon:"💻",description:"パソコン作業を快適にするアイテム。",rank:1,link:""},
- {id:5,name:"ワイヤレスイヤホン",category:"パソコン・家電",icon:"🎧",description:"通勤や作業中に便利なオーディオ用品。",rank:2,link:""},
- {id:6,name:"便利なキッチン家電",category:"パソコン・家電",icon:"🍳",description:"毎日の家事を助ける便利な家電。",rank:3,link:""},
- {id:7,name:"人気スキンケア",category:"美容・ファッション",icon:"🧴",description:"毎日の美容習慣に取り入れたいアイテム。",rank:1,link:""},
- {id:8,name:"レディースファッション",category:"美容・ファッション",icon:"👗",description:"普段使いからお出かけまで楽しめる服。",rank:2,link:""},
- {id:9,name:"便利な生活グッズ",category:"生活・便利グッズ",icon:"🏠",description:"毎日の暮らしをちょっと便利にする商品。",rank:1,link:""},
- {id:10,name:"お掃除便利アイテム",category:"生活・便利グッズ",icon:"🧹",description:"お掃除を手軽にする便利グッズ。",rank:2,link:""},
- {id:11,name:"おすすめホテル予約",category:"旅行・ホテル",icon:"🏨",description:"旅行や出張の宿泊先探しに役立つサービス。",rank:1,link:""},
- {id:12,name:"旅行便利グッズ",category:"旅行・ホテル",icon:"🧳",description:"旅行を快適に楽しむためのアイテム。",rank:2,link:""}
-];
+const products = (window.PRODUCTS || []).map(p => ({
+  ...p,
+  icon: p.icon || "🛍️",
+  rank: p.rank || 99,
+  link: p.link || p.url || ""
+}));
 
 const categoryList = [
  "すべて",
