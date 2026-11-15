@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>おトク発見ナビ｜商品管理</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#f7f5ff;color:#333;font-family:Arial,"Noto Sans JP",sans-serif}
+main{max-width:750px;margin:30px auto;background:white;padding:25px;border-radius:20px;box-shadow:0 5px 25px #0000000d}
+h1{color:#705bc7;font-size:24px}
+.note{font-size:13px;color:#888;line-height:1.7}
+button{border:0;border-radius:22px;padding:12px 18px;background:#7963d8;color:white;font-weight:bold;cursor:pointer;margin:5px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;margin:7px 0 15px;font-size:14px}
+label{font-size:13px;font-weight:bold}
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid #eee;border-radius:12px;margin:10px 0}
+.item-name{font-size:13px;flex:1;overflow-wrap:anywhere}
+.delete{background:#fff0f0;color:#c44}
+.secondary{background:#eee;color:#555}
+.back-button{display:inline-block;text-decoration:none;background:#f0ebff;color:#705bc7;padding:11px 18px;border-radius:22px;font-size:14px;font-weight:bold;margin-bottom:15px}
+.back-button:hover{background:#e5ddff}
+.hidden{display:none}
+hr{border:0;border-top:1px solid #eee;margin:25px 0}
+.status{font-size:13px;color:#705bc7;margin:10px 0}
+#preview{display:none;max-width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin:5px 0 15px;background:#f7f5ff;padding:5px}
+.file-label{display:block;background:#f3efff;border:2px dashed #b8a8ed;border-radius:14px;padding:20px;text-align:center;color:#705bc7;cursor:pointer;margin:8px 0}
+.file-label input{display:none}
+@media(max-width:600px){
+ body{padding:10px}
+ main{margin:15px auto;padding:18px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<a class="back-button" href="index.html">← 公開ページに戻る</a>
+
+<h1>おトク発見ナビ 商品管理</h1>
+<p class="note">管理者専用ページです。Googleアカウントでログインしてください。</p>
+
+<section id="loginArea">
+<button id="login">Googleアカウントでログイン</button>
+<p id="message" class="note"></p>
+</section>
+
+<section id="adminArea" class="hidden">
+<p class="note">ログイン中：<span id="userEmail"></span></p>
+<button id="logout" class="secondary">ログアウト</button>
+
+<hr>
+<h2>商品を追加</h2>
+
+<form id="form">
+<label>商品名 *</label>
+<input id="name" required>
+
+<label>カテゴリー *</label>
+<select id="category">
+<option>AI・便利ツール</option>
+<option>パソコン・家電</option>
+<option>美容・ファッション</option>
+<option>生活・便利グッズ</option>
+<option>旅行・ホテル</option>
+</select>
+
+<label>商品説明</label>
+<textarea id="description"></textarea>
+
+<label>商品リンク *</label>
+<input id="url" type="url" required placeholder="https://...">
+
+<label>商品画像（写真ファイル）</label>
+<label class="file-label">
+  <span>📷 写真を選択する</span>
+  <input id="imageFile" type="file" accept="image/*">
+</label>
+<img id="preview" alt="画像プレビュー">
+<p id="imageStatus" class="note">写真を選ぶと自動で圧縮します。画像なしでも登録できます。</p>
+
+<button type="submit" id="addButton">商品を追加する</button>
+</form>
+
+<hr>
+<h2>登録済み商品</h2>
+<p id="status" class="status"></p>
+<div id="list">読み込み中...</div>
+</section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, addDoc,
+  deleteDoc, doc
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCpsSCuwwawuikXGFpIWjRTPL49_FDamrc",
+  authDomain: "otoku-hakken-navi.firebaseapp.com",
+  projectId: "otoku-hakken-navi",
+  storageBucket: "otoku-hakken-navi.firebasestorage.app",
+  messagingSenderId: "440089037998",
+  appId: "1:440089037998:web:92b0c6d56f948bd629713f",
+  measurementId: "G-L4WMMVCQ5Q"
+};
+
+const ADMIN_EMAIL = "keita19711020@gmail.com";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+const loginArea = document.getElementById("loginArea");
+const adminArea = document.getElementById("adminArea");
+const message = document.getElementById("message");
+const list = document.getElementById("list");
+const status = document.getElementById("status");
+const addButton = document.getElementById("addButton");
+const imageFile = document.getElementById("imageFile");
+const preview = document.getElementById("preview");
+const imageStatus = document.getElementById("imageStatus");
+
+let products = [];
+let currentUser = null;
+let compressedImage = "";
+
+document.getElementById("login").addEventListener("click", async () => {
+  message.textContent = "ログインしています...";
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    message.textContent = "ログインできませんでした：" + error.message;
+  }
+});
+
+document.getElementById("logout").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, async user => {
+  loginArea.classList.remove("hidden");
+  adminArea.classList.add("hidden");
+  currentUser = null;
+
+  if (!user) {
+    message.textContent = "管理者アカウントでログインしてください。";
+    return;
+  }
+
+  if (user.email !== ADMIN_EMAIL || !user.emailVerified) {
+    message.textContent = "このアカウントには管理権限がありません。";
+    await signOut(auth);
+    return;
+  }
+
+  currentUser = user;
+  message.textContent = "";
+  loginArea.classList.add("hidden");
+  adminArea.classList.remove("hidden");
+  document.getElementById("userEmail").textContent = user.email;
+
+  await loadProducts();
+});
+
+async function compressImage(file) {
+  const objectURL = URL.createObjectURL(file);
+
+  try {
+    const img = new Image();
+    img.src = objectURL;
+    await img.decode();
+
+    const maxSize = 1200;
+    const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    let quality = 0.75;
+    let result = canvas.toDataURL("image/jpeg", quality);
+
+    while (result.length > 650000 && quality > 0.35) {
+      quality -= 0.1;
+      result = canvas.toDataURL("image/jpeg", quality);
+    }
+
+    if (result.length > 700000) {
+      throw new Error("画像サイズが大きすぎます。別の写真を選んでください。");
+    }
+
+    return result;
+  } finally {
+    URL.revokeObjectURL(objectURL);
+  }
+}
+
+imageFile.addEventListener("change", async () => {
+  const file = imageFile.files[0];
+  compressedImage = "";
+  preview.style.display = "none";
+
+  if (!file) {
+    imageStatus.textContent = "画像は選択されていません。";
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    imageStatus.textContent = "画像ファイルを選択してください。";
+    imageFile.value = "";
+    return;
+  }
+
+  imageStatus.textContent = "画像を圧縮しています...";
+
+  try {
+    compressedImage = await compressImage(file);
+    preview.src = compressedImage;
+    preview.style.display = "block";
+    imageStatus.textContent = "写真の準備ができました。圧縮済みです。";
+  } catch (error) {
+    compressedImage = "";
+    imageFile.value = "";
+    imageStatus.textContent = error.message || "画像を読み込めませんでした。";
+  }
+});
+
+async function loadProducts() {
+  list.textContent = "商品を読み込み中...";
+  status.textContent = "";
+
+  try {
+    const snapshot = await getDocs(collection(db, "products"));
+
+    products = snapshot.docs.map(d => ({
+      ...d.data(),
+      _docId: d.id
+    }));
+
+    draw();
+    status.textContent = "登録商品：" + products.length + "件";
+  } catch (error) {
+    list.textContent = "読み込みエラー：" + error.message;
+  }
+}
+
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function draw() {
+  list.innerHTML = "";
+
+  if (!products.length) {
+    list.textContent = "商品はありません。新しい商品を追加できます。";
+    return;
+  }
+
+  products.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML =
+      '<div class="item-name">' + esc(p.name) +
+      '<br><span style="color:#999">' + esc(p.category) +
+      '</span></div><button class="delete">削除</button>';
+
+    div.querySelector("button").addEventListener("click", async () => {
+      if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
+        alert("管理者としてログインしてください。");
+        return;
+      }
+
+      if (!confirm("「" + p.name + "」を削除しますか？")) return;
+
+      try {
+        await deleteDoc(doc(db, "products", p._docId));
+        products = products.filter(item => item._docId !== p._docId);
+        draw();
+        status.textContent = "登録商品：" + products.length + "件";
+        alert("商品を削除しました。");
+      } catch (error) {
+        alert("削除できませんでした：" + error.message);
+      }
+    });
+
+    list.appendChild(div);
+  });
+}
+
+document.getElementById("form").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if (!currentUser || currentUser.email !== ADMIN_EMAIL || !currentUser.emailVerified) {
+    alert("管理者としてログインしてください。");
+    return;
+  }
+
+  const url = document.getElementById("url").value.trim();
+
+  if (!/^https:\/\//i.test(url)) {
+    alert("商品リンクはhttps://から入力してください。");
+    return;
+  }
+
+  addButton.disabled = true;
+  addButton.textContent = "保存中...";
+
+  try {
+    await addDoc(collection(db, "products"), {
+      id: Date.now(),
+      name: document.getElementById("name").value.trim(),
+      category: document.getElementById("category").value,
+      description: document.getElementById("description").value.trim(),
+      image: compressedImage,
+      url,
+      link: url
+    });
+
+    e.target.reset();
+    compressedImage = "";
+    preview.src = "";
+    preview.style.display = "none";
+    imageStatus.textContent = "写真を選ぶと自動で圧縮します。画像なしでも登録できます。";
+
+    await loadProducts();
+    alert("商品を保存しました。");
+  } catch (error) {
+    console.error(error);
+    alert("保存できませんでした：" + error.message);
+  } finally {
+    addButton.disabled = false;
+    addButton.textContent = "商品を追加する";
+  }
+});
+</script>
+</body>
+</html>
