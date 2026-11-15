@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="おトク発見ナビ。便利な商品やサービスを見つける情報サイトです。">
+<title>おトク発見ナビ</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;background:#f7f8fc;color:#333}
+header{background:white;padding:12px 16px;border-bottom:1px solid #eee}
+.header-inner{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{text-align:left;flex:1}
+header h1{margin:0;color:#6755c8;font-size:20px}
+.admin-link{display:inline-block;white-space:nowrap;text-decoration:none;background:linear-gradient(100deg,#7963d8,#a18ae9);color:white;padding:8px 14px;border-radius:25px;font-size:12px;font-weight:bold;box-shadow:0 3px 10px #7963d833}
+.admin-link:hover{opacity:.85}
+.hero{max-width:1000px;margin:0 auto;text-align:center;background:white}
+.hero img{width:100%;height:auto;display:block}
+main{max-width:1000px;margin:20px auto;padding:0 15px}
+.search{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;background:white}
+.categories{display:flex;gap:8px;overflow-x:auto;padding:16px 0}
+.categories button{white-space:nowrap;border:1px solid #ddd;background:white;border-radius:20px;padding:9px 15px;color:#555;cursor:pointer}
+.categories button.active{background:#6755c8;color:white;border-color:#6755c8}
+.info{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
+.info h2{font-size:18px;margin:0}
+.info select{padding:8px;border:1px solid #ddd;border-radius:8px;background:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.card{background:white;border:1px solid #eeeaf8;border-radius:20px;padding:15px;box-shadow:0 5px 18px #503c120c;overflow:hidden}
+.product-image{height:180px;background:linear-gradient(145deg,#f4efff,#fff0f6);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:65px;margin-bottom:15px;overflow:hidden}
+.product-image img{width:100%;height:100%;object-fit:contain}
+.card h3{font-size:15px;line-height:1.7;margin:10px 0;color:#333;min-height:52px}
+.category{display:inline-block;font-size:11px;color:#7258bd;background:#f2edff;padding:5px 11px;border-radius:20px}
+.description{font-size:13px;color:#888;line-height:1.7;min-height:42px}
+.card button,.buy{display:block;width:100%;border:0;border-radius:25px;padding:13px;margin-top:10px;background:linear-gradient(100deg,#7963d8,#a18ae9);color:white;font-size:14px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}
+.card .favorite{background:#fff0f5;color:#d65b85;border:1px solid #ffe0eb}
+.empty{text-align:center;padding:35px;color:#888}
+footer{text-align:center;padding:30px 15px;color:#777;font-size:12px;line-height:2}
+.modal-bg{display:none;position:fixed;inset:0;background:#0008;z-index:10;padding:20px;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:white;border-radius:15px;padding:22px;width:100%;max-width:500px;max-height:90vh;overflow:auto}
+.modal h2{font-size:19px}
+.close{float:right;border:0;background:#eee;border-radius:50%;width:32px;height:32px;cursor:pointer}
+@media(max-width:600px){
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .card{padding:10px;border-radius:15px}
+ .product-image{height:140px}
+ .card h3{font-size:13px;min-height:60px}
+ .description{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="header-inner">
+  <div class="brand">
+    <h1>おトク発見ナビ</h1>
+  </div>
+  <a class="admin-link" href="admin.html">⚙ 管理ページ</a>
+</div>
+</header>
+
+<section class="hero">
+  <img src="IMG_5222.jpeg" alt="おトク発見ナビ 毎日に、ときめく発見を。暮らしを彩る、わたしのセレクトショップ。">
+</section>
+
+<main>
+<input id="searchInput" class="search" type="search" placeholder="商品名やキーワードで検索">
+<div id="categories" class="categories"></div>
+<div class="info">
+<h2 id="resultTitle">おすすめ商品</h2>
+<select id="sortSelect">
+<option value="default">おすすめ順</option>
+<option value="name">名前順</option>
+</select>
+</div>
+<div id="productGrid" class="grid">
+<div class="empty">商品を読み込んでいます...</div>
+</div>
+</main>
+
+<div id="modalBg" class="modal-bg">
+<div class="modal">
+<button class="close" id="closeModal">×</button>
+<div id="modalContent"></div>
+</div>
+</div>
+
+<footer>
+<p>おトク発見ナビ</p>
+<p>Amazonのアソシエイトとして、適格販売により収入を得ています。</p>
+<p>商品情報は各販売サイトでご確認ください。</p>
+</footer>
+
+<script src="products.js?v=6"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCpsSCuwwawuikXGFpIWjRTPL49_FDamrc",
+  authDomain: "otoku-hakken-navi.firebaseapp.com",
+  projectId: "otoku-hakken-navi",
+  storageBucket: "otoku-hakken-navi.firebasestorage.app",
+  messagingSenderId: "440089037998",
+  appId: "1:440089037998:web:92b0c6d56f948bd629713f",
+  measurementId: "G-L4WMMVCQ5Q"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const fallbackProducts = (window.PRODUCTS || []).map(p => ({
+  ...p,
+  icon: p.icon || "🛍️",
+  link: p.link || p.url || ""
+}));
+
+let products = [];
+let selectedCategory = "すべて";
+const favorites = [];
+
+const categoryList = [
+  "すべて",
+  "AI・便利ツール",
+  "パソコン・家電",
+  "美容・ファッション",
+  "生活・便利グッズ",
+  "旅行・ホテル"
+];
+
+const categories = document.getElementById("categories");
+const grid = document.getElementById("productGrid");
+const searchInput = document.getElementById("searchInput");
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[c]);
+}
+
+function makeCategories() {
+  categories.innerHTML = "";
+  categoryList.forEach(category => {
+    const button = document.createElement("button");
+    button.textContent = category;
+    button.className = selectedCategory === category ? "active" : "";
+    button.addEventListener("click", () => {
+      selectedCategory = category;
+      makeCategories();
+      render();
+    });
+    categories.appendChild(button);
+  });
+}
+
+function render() {
+  const keyword = searchInput.value.toLowerCase();
+  let list = products.filter(p => {
+    const categoryMatch = selectedCategory === "すべて" || p.category === selectedCategory;
+    const keywordMatch =
+      (p.name || "").toLowerCase().includes(keyword) ||
+      (p.description || "").toLowerCase().includes(keyword);
+    return categoryMatch && keywordMatch;
+  });
+
+  if (document.getElementById("sortSelect").value === "name") {
+    list.sort((a,b) => (a.name || "").localeCompare(b.name || "", "ja"));
+  }
+
+  document.getElementById("resultTitle").textContent = "おすすめ商品（" + list.length + "件）";
+  grid.innerHTML = "";
+
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty">商品がありません。別のカテゴリーやキーワードをお試しください。</div>';
+    return;
+  }
+
+  list.forEach(product => {
+    const card = document.createElement("article");
+    card.className = "card";
+
+    const imageHTML = product.image
+      ? `<img src="${escapeHTML(product.image)}" alt="${escapeHTML(product.name)}" loading="lazy">`
+      : escapeHTML(product.icon || "🛍️");
+
+    card.innerHTML = `
+      <div class="product-image">${imageHTML}</div>
+      <div class="category">${escapeHTML(product.category || "その他")}</div>
+      <h3>${escapeHTML(product.name)}</h3>
+      <p class="description">${escapeHTML(product.description || "")}</p>
+      <button class="detail">詳細を見る</button>
+      <button class="favorite">♡ お気に入り</button>
+    `;
+
+    card.querySelector(".detail").addEventListener("click", () => showDetail(product));
+
+    const favoriteButton = card.querySelector(".favorite");
+    if (favorites.includes(product.id)) {
+      favoriteButton.textContent = "♥ お気に入り登録済み";
+    }
+
+    favoriteButton.addEventListener("click", () => {
+      const index = favorites.indexOf(product.id);
+      if (index === -1) {
+        favorites.push(product.id);
+        favoriteButton.textContent = "♥ お気に入り登録済み";
+      } else {
+        favorites.splice(index, 1);
+        favoriteButton.textContent = "♡ お気に入り";
+      }
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+function showDetail(product) {
+  const imageHTML = product.image
+    ? `<img src="${escapeHTML(product.image)}" alt="" style="width:100%;max-height:220px;object-fit:contain">`
+    : "";
+
+  document.getElementById("modalContent").innerHTML = `
+    ${imageHTML}
+    <h2>${escapeHTML(product.name)}</h2>
+    <p>${escapeHTML(product.description || "")}</p>
+    <p>カテゴリー：${escapeHTML(product.category || "その他")}</p>
+    <a class="buy" href="${escapeHTML(product.link || product.url || "#")}" target="_blank" rel="noopener noreferrer">
+      販売サイトで商品を見る
+    </a>
+  `;
+  document.getElementById("modalBg").classList.add("show");
+}
+
+async function loadProducts() {
+  try {
+    const snapshot = await getDocs(collection(db, "products"));
+    if (!snapshot.empty) {
+      products = snapshot.docs.map(d => {
+        const p = d.data();
+        return {...p, link: p.link || p.url || ""};
+      });
+    } else {
+      products = fallbackProducts;
+    }
+  } catch (error) {
+    console.error("商品読み込みエラー:", error);
+    products = fallbackProducts;
+  }
+  makeCategories();
+  render();
+}
+
+searchInput.addEventListener("input", render);
+document.getElementById("sortSelect").addEventListener("change", render);
+
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("modalBg").classList.remove("show");
+});
+
+document.getElementById("modalBg").addEventListener("click", event => {
+  if (event.target.id === "modalBg") {
+    event.currentTarget.classList.remove("show");
+  }
+});
+
+loadProducts();
+</script>
+</body>
+</html>
