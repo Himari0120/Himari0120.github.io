@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>おトク発見ナビ｜データバックアップ</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:24px 16px;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
+  background:#f8f5ff;color:#393247;
+}
+.container{
+  max-width:520px;margin:40px auto;padding:26px;
+  background:white;border-radius:20px;
+  box-shadow:0 5px 25px #0000000d;
+}
+h1{font-size:23px;text-align:center}
+p{line-height:1.8;font-size:14px}
+button{
+  width:100%;padding:15px;margin-top:12px;
+  border:0;border-radius:12px;
+  background:#9273ce;color:white;
+  font-size:16px;font-weight:bold;
+}
+button:disabled{opacity:.5}
+#status{
+  margin-top:18px;padding:14px;
+  border-radius:10px;background:#f3effb;
+  white-space:pre-wrap;font-size:14px;
+}
+.small{color:#777;font-size:12px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>おトク発見ナビ</h1>
+<h2 style="text-align:center">商品データバックアップ</h2>
+<p>Firestoreに保存されている商品データをJSONファイルに保存します。既存の商品データは変更・削除しません。</p>
+
+<button id="loginBtn">管理者ログイン</button>
+<button id="backupBtn" disabled>商品データをバックアップ</button>
+
+<div id="status">ログインしてください。</div>
+<p class="small">管理者専用ページです。バックアップファイルは大切に保管してください。</p>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCpsSCuwwawuikXGFpIWjRTPL49_FDamrc",
+  authDomain: "otoku-hakken-navi.firebaseapp.com",
+  projectId: "otoku-hakken-navi",
+  storageBucket: "otoku-hakken-navi.firebasestorage.app",
+  messagingSenderId: "440089037998",
+  appId: "1:440089037998:web:92b0c6d56f948bd629713f",
+  measurementId: "G-L4WMMVCQ5Q"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const ADMIN_EMAIL = "keita19711020@gmail.com";
+const statusBox = document.getElementById("status");
+const loginBtn = document.getElementById("loginBtn");
+const backupBtn = document.getElementById("backupBtn");
+
+function setStatus(message){
+  statusBox.textContent = message;
+}
+
+auth.onAuthStateChanged(user => {
+  if(user && user.email === ADMIN_EMAIL && user.emailVerified){
+    loginBtn.textContent = "管理者ログイン済み";
+    backupBtn.disabled = false;
+    setStatus("ログイン確認済みです。\nバックアップを実行できます。");
+  }else{
+    backupBtn.disabled = true;
+    loginBtn.textContent = "管理者ログイン";
+    setStatus("管理者ログインが必要です。");
+  }
+});
+
+loginBtn.addEventListener("click", async () => {
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  }catch(error){
+    setStatus("ログインエラー： " + error.message);
+  }
+});
+
+backupBtn.addEventListener("click", async () => {
+  const user = auth.currentUser;
+
+  if(!user || user.email !== ADMIN_EMAIL || !user.emailVerified){
+    setStatus("管理者としてログインしてください。");
+    return;
+  }
+
+  backupBtn.disabled = true;
+  setStatus("商品データを取得しています...");
+
+  try{
+    const snapshot = await db.collection("products").get();
+
+    const products = snapshot.docs.map(doc => ({
+      documentId: doc.id,
+      ...doc.data()
+    }));
+
+    const backupData = {
+      backupDate: new Date().toISOString(),
+      projectId: "otoku-hakken-navi",
+      collection: "products",
+      count: products.length,
+      products: products
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(backupData, null, 2)],
+      {type:"application/json"}
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "otoku-hakken-navi-backup-" +
+      new Date().toISOString().slice(0,10) + ".json";
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    setStatus(
+      "バックアップデータを作成しました。\n" +
+      "商品件数：" + products.length + "件\n" +
+      "JSONファイルを保存してください。"
+    );
+
+  }catch(error){
+    setStatus("バックアップエラー： " + error.message);
+  }finally{
+    backupBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
