@@ -9,15 +9,15 @@ import { initializeSalesMonitor } from "./sales-monitor.js";
 import { initializeSettings } from "./settings.js";
 
 const pages = {
-  "#dashboard": ["ダッシュボード", initializeDashboard],
-  "#program": ["プログラム管理", initializeProgram],
-  "#zip": ["ZIP管理", initializeZip],
-  "#version": ["バージョン管理", initializeVersion],
-  "#testing": ["テスト管理", initializeTesting],
-  "#release": ["リリース管理", initializeRelease],
-  "#security": ["セキュリティ管理", initializeSecurity],
-  "#sales": ["販売ページ監視", initializeSalesMonitor],
-  "#settings": ["運営者設定", initializeSettings]
+  "#dashboard": initializeDashboard,
+  "#program": initializeProgram,
+  "#zip": initializeZip,
+  "#version": initializeVersion,
+  "#testing": initializeTesting,
+  "#release": initializeRelease,
+  "#security": initializeSecurity,
+  "#sales": initializeSalesMonitor,
+  "#settings": initializeSettings
 };
 
 const content = document.querySelector("#operator-content");
@@ -27,19 +27,20 @@ function showPage(hash) {
   if (!content) return;
 
   const page = pages[hash] || pages["#dashboard"];
+  const currentHash = pages[hash] ? hash : "#dashboard";
 
   content.innerHTML = `
     <div class="page-heading">
-      <h2>${page[0]}</h2>
       <a href="#dashboard" class="back-link">ダッシュボードへ戻る</a>
     </div>
   `;
 
-  page[1](content);
+  page(content);
 
   navLinks.forEach(link => {
-    const active = link.getAttribute("href") === hash;
+    const active = link.getAttribute("href") === currentHash;
     link.classList.toggle("active", active);
+
     if (active) {
       link.setAttribute("aria-current", "page");
     } else {
