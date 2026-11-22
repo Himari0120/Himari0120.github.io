@@ -4,15 +4,16 @@
 
 body {
   margin: 0;
-  background: #f4f6fa;
-  color: #263247;
+  background: #f1f5f9;
+  color: #1e293b;
   font-family: Arial, "Noto Sans JP", sans-serif;
 }
 
 .header {
-  padding: 22px;
+  padding: 22px 30px;
   background: #17243a;
   color: white;
+  box-shadow: 0 3px 12px #0002;
 }
 
 .header h1 {
@@ -26,65 +27,109 @@ body {
 }
 
 .container {
-  max-width: 1100px;
-  margin: 35px auto;
+  max-width: 1200px;
+  margin: 30px auto;
   padding: 0 20px;
 }
 
 .login-panel,
-.dashboard {
+.dashboard,
+.management-section {
   margin-bottom: 24px;
-  padding: 25px;
+  padding: 26px;
   background: white;
-  border: 1px solid #e1e6ef;
-  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px #0f172a08;
 }
 
 h2 {
   margin-top: 0;
+  font-size: 21px;
 }
 
-nav {
+.dashboard nav {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
-nav a {
-  padding: 16px;
-  background: #edf2f8;
-  border-radius: 8px;
-  color: #2455a4;
+.dashboard nav a {
+  display: block;
+  padding: 18px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  color: #1d4ed8;
   text-decoration: none;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.dashboard nav a:hover {
+  background: #dbeafe;
+  transform: translateY(-2px);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.status-card {
+  padding: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #64748b;
+  border-radius: 10px;
+}
+
+.status-card h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.status-card p {
+  margin: 0;
+  color: #475569;
   font-weight: bold;
 }
 
-nav a:hover {
-  background: #dce8f8;
-}
-
 .notice {
-  margin-top: 20px;
-  padding: 14px;
-  background: #fff6df;
-  border-radius: 8px;
-  color: #795b16;
+  margin-top: 22px;
+  padding: 16px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 9px;
+  color: #9a3412;
+  line-height: 1.7;
 }
 
 footer {
-  padding: 20px;
+  padding: 25px;
   text-align: center;
   color: #64748b;
 }
 
 @media (max-width: 600px) {
+  .header {
+    padding: 18px;
+  }
+
   .container {
-    margin: 20px auto;
+    margin: 18px auto;
     padding: 0 12px;
   }
 
   .login-panel,
-  .dashboard {
+  .dashboard,
+  .management-section {
     padding: 18px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
 }
