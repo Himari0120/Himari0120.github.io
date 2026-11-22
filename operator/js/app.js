@@ -20,27 +20,45 @@ const pages = {
   "#settings": ["運営者設定", initializeSettings]
 };
 
-const dashboard = document.querySelector(".dashboard");
+const content = document.querySelector("#operator-content");
+const navLinks = document.querySelectorAll(".dashboard nav a");
 
-if (dashboard) {
-  const content = document.createElement("div");
-  content.id = "operator-content";
-  dashboard.appendChild(content);
+function showPage(hash) {
+  if (!content) return;
 
-  function showPage(hash) {
-    const page = pages[hash] || pages["#dashboard"];
-    content.innerHTML = `<h2>${page[0]}</h2>`;
-    page[1](content);
-  }
+  const page = pages[hash] || pages["#dashboard"];
 
-  document.querySelectorAll(".dashboard nav a").forEach(link => {
-    link.addEventListener("click", event => {
-      event.preventDefault();
-      const hash = link.getAttribute("href");
-      history.replaceState(null, "", hash);
-      showPage(hash);
-    });
+  content.innerHTML = `
+    <div class="page-heading">
+      <h2>${page[0]}</h2>
+      <a href="#dashboard" class="back-link">ダッシュボードへ戻る</a>
+    </div>
+  `;
+
+  page[1](content);
+
+  navLinks.forEach(link => {
+    const active = link.getAttribute("href") === hash;
+    link.classList.toggle("active", active);
+    if (active) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
   });
-
-  showPage(location.hash || "#dashboard");
 }
+
+navLinks.forEach(link => {
+  link.addEventListener("click", event => {
+    event.preventDefault();
+    const hash = link.getAttribute("href");
+    history.replaceState(null, "", hash);
+    showPage(hash);
+  });
+});
+
+window.addEventListener("hashchange", () => {
+  showPage(location.hash || "#dashboard");
+});
+
+showPage(location.hash || "#dashboard");
