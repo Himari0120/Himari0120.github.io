@@ -1,0 +1,57 @@
+
+/* =====================================
+   おトク発見ナビ
+   運営者認証管理 auth.js
+===================================== */
+
+const AUTH_STATUS = {
+  NOT_CONNECTED: "AUTH_SERVER_NOT_CONNECTED",
+  UNAUTHENTICATED: "UNAUTHENTICATED",
+  AUTHENTICATED: "AUTHENTICATED"
+};
+
+let authStatus = AUTH_STATUS.NOT_CONNECTED;
+let callbacks = {};
+
+export const initializeAuth = {
+
+  async initialize(options = {}) {
+    callbacks = options;
+
+    // 認証サーバー未接続のため、
+    // 認証済みとして扱わない。
+    authStatus = AUTH_STATUS.NOT_CONNECTED;
+
+    if (typeof callbacks.onLogout === "function") {
+      callbacks.onLogout();
+    }
+
+    console.info("運営者認証サーバー未接続");
+
+    return {
+      authenticated: false,
+      status: authStatus
+    };
+  },
+
+  async logout() {
+    authStatus = AUTH_STATUS.UNAUTHENTICATED;
+
+    if (typeof callbacks.onLogout === "function") {
+      callbacks.onLogout();
+    }
+
+    return {
+      success: true,
+      status: authStatus
+    };
+  },
+
+  isAuthenticated() {
+    return authStatus === AUTH_STATUS.AUTHENTICATED;
+  },
+
+  getStatus() {
+    return authStatus;
+  }
+};
