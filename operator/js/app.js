@@ -1,3 +1,5 @@
+
+import { initializeAuth } from "./auth.js";
 import { initializeDashboard } from "./dashboard.js";
 import { initializeProgram } from "./program.js";
 import { initializeZip } from "./zip.js";
@@ -20,14 +22,19 @@ const pages = {
   "#settings": initializeSettings
 };
 
+const loginPanel = document.querySelector("#login-panel");
+const dashboardPanel = document.querySelector("#dashboard-panel");
+const loginForm = document.querySelector("#login-form");
+const loginMessage = document.querySelector("#login-message");
+const logoutButton = document.querySelector("#logout-button");
 const content = document.querySelector("#operator-content");
 const navLinks = document.querySelectorAll(".dashboard nav a");
 
 function showPage(hash) {
   if (!content) return;
 
-  const page = pages[hash] || pages["#dashboard"];
   const currentHash = pages[hash] ? hash : "#dashboard";
+  const page = pages[currentHash];
 
   content.innerHTML = `
     <div class="page-heading">
@@ -49,6 +56,42 @@ function showPage(hash) {
   });
 }
 
+function showLogin(message = "") {
+  loginPanel.hidden = false;
+  dashboardPanel.hidden = true;
+  loginMessage.textContent = message;
+}
+
+function showDashboard() {
+  loginPanel.hidden = true;
+  dashboardPanel.hidden = false;
+  showPage(location.hash || "#dashboard");
+}
+
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = document.querySelector("#login-email").value.trim();
+  const password = document.querySelector("#login-password").value;
+
+  loginMessage.textContent = "ログイン確認中です。";
+
+  try {
+    await initializeAuth.login(email, password);
+    loginForm.reset();
+    showDashboard();
+  } catch (error) {
+    console.error(error);
+    loginMessage.textContent =
+      "ログインできませんでした。メールアドレスとパスワードを確認してください。";
+  }
+});
+
+logoutButton.addEventListener("click", async () => {
+  await initializeAuth.logout();
+  showLogin("ログアウトしました。");
+});
+
 navLinks.forEach(link => {
   link.addEventListener("click", event => {
     event.preventDefault();
@@ -59,7 +102,20 @@ navLinks.forEach(link => {
 });
 
 window.addEventListener("hashchange", () => {
-  showPage(location.hash || "#dashboard");
+  if (initializeAuth.isAuthenticated()) {
+    showPage(location.hash || "#dashboard");
+  }
 });
 
-showPage(location.hash || "#dashboard");
+try {
+  const result = await initializeAuth.initialize();
+
+  if (result.authenticated) {
+    showDashboard();
+  } else {
+    showLogin();
+  }
+} catch (error) {
+  console.error(error);
+  showLogin("認証サーバーに接続できません。");
+}
