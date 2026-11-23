@@ -1,7 +1,16 @@
 
-
 const API_URL =
   "https://otoku-navigation-api.keita19711020.workers.dev/api/admin/program/data";
+
+const HISTORY_URL =
+  "https://otoku-navigation-api.keita19711020.workers.dev/api/admin/program/history";
+
+const MANAGEMENT_RULES = [
+  "購入者向けファイルを直接変更しない",
+  "変更前に必ずバックアップを作成する",
+  "更新前にテストとセキュリティ確認を行う",
+  "コードの変更・改造・アップデートは開発者本人のみ実施する"
+];
 
 export async function initializeProgram(container) {
   if (!container) return;
@@ -19,19 +28,16 @@ export async function initializeProgram(container) {
         <h3>プログラム情報</h3>
 
         <label for="dev-version">開発バージョン</label>
-        <input id="dev-version" name="devVersion"
-          type="text" maxlength="50" required>
+        <input id="dev-version" type="text" maxlength="50" required>
 
         <label for="public-version">公開バージョン</label>
-        <input id="public-version" name="publicVersion"
-          type="text" maxlength="50" required>
+        <input id="public-version" type="text" maxlength="50" required>
 
         <label for="change-log">変更履歴（1行につき1項目）</label>
-        <textarea id="change-log" name="changeLog"
-          rows="6" maxlength="3000"></textarea>
+        <textarea id="change-log" rows="6" maxlength="3000"></textarea>
 
         <label for="integrity-status">ファイル整合性</label>
-        <select id="integrity-status" name="integrityStatus" required>
+        <select id="integrity-status" required>
           <option value="未確認">未確認</option>
           <option value="確認済み">確認済み</option>
           <option value="要確認">要確認</option>
@@ -46,22 +52,26 @@ export async function initializeProgram(container) {
       </form>
 
       <div class="status-card">
+        <h3>更新履歴</h3>
+        <p>最新100件の保存記録を表示します。</p>
+        <div id="history-list">履歴を読み込み中...</div>
+      </div>
+
+      <div class="status-card">
         <h3>管理上のルール</h3>
         <ul>
-          <li>購入者向けファイルを直接変更しない</li>
-          <li>変更前に必ずバックアップを作成する</li>
-          <li>更新前にテストとセキュリティ確認を行う</li>
-          <li>コードの変更・改造・アップデートは開発者本人のみ実施する</li>
+          ${MANAGEMENT_RULES.map(rule => `<li>${escapeHtml(rule)}</li>`).join("")}
         </ul>
       </div>
     </section>
   `;
 
-  const form = container.querySelector("#program-form");
   const connection = container.querySelector("#program-connection");
+  const form = container.querySelector("#program-form");
   const message = container.querySelector("#program-message");
   const saveButton = container.querySelector("#save-button");
   const reloadButton = container.querySelector("#reload-button");
+  const historyList = container.querySelector("#history-list");
 
   const devVersion = container.querySelector("#dev-version");
   const publicVersion = container.querySelector("#public-version");
@@ -79,36 +89,44 @@ export async function initializeProgram(container) {
     }
 
     await loadData();
+    await loadHistory();
   } catch (error) {
     connection.textContent = "接続エラー：" + error.message;
+    historyList.textContent = "履歴を取得できませんでした。";
   }
 
   async function getToken() {
     if (!user) {
       throw new Error("ログインが確認できません");
     }
-
     return await user.getIdToken();
   }
 
-  async function loadData() {
-    connection.textContent = "KV接続確認中...";
-    message.textContent = "";
-
+  async function requestJSON(url, options = {}) {
     const token = await getToken();
 
-    const response = await fetch(API_URL, {
-      method: "GET",
+    const response = await fetch(url, {
+      ...options,
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
+        ...(options.headers || {})
       }
     });
 
     const result = await response.json();
 
     if (!response.ok || result.success !== true) {
-      throw new Error("プログラム情報を取得できませんでした");
+      throw new Error(result.error || "通信に失敗しました");
     }
+
+    return result;
+  }
+
+  async function loadData() {
+    connection.textContent = "KV接続確認中...";
+    message.textContent = "";
+
+    const result = await requestJSON(API_URL);
 
     connection.textContent = "KV接続：接続済み";
 
@@ -129,6 +147,45 @@ export async function initializeProgram(container) {
       changeLog.value = "";
       integrityStatus.value = "未確認";
       message.textContent = "まだ登録情報はありません。";
+    }
+  }
+
+  async function loadHistory() {
+    historyList.textContent = "履歴を読み込み中...";
+
+    try {
+      const result = await requestJSON(HISTORY_URL);
+
+      if (!Array.isArray(result.history) || result.history.length === 0) {
+        historyList.textContent = "更新履歴はまだありません。";
+        return;
+      }
+
+      historyList.innerHTML = result.history.map((item, index) => {
+        const logs = Array.isArray(item.changeLog)
+          ? item.changeLog
+          : [];
+
+        return `
+          <article class="status-card" style="margin-top:12px;">
+            <h4>更新記録 ${index + 1}</h4>
+            <p><strong>更新日時：</strong>${escapeHtml(item.updatedAt || "不明")}</p>
+            <p><strong>開発バージョン：</strong>${escapeHtml(item.devVersion || "不明")}</p>
+            <p><strong>公開バージョン：</strong>${escapeHtml(item.publicVersion || "不明")}</p>
+            <p><strong>ファイル整合性：</strong>${escapeHtml(item.integrityStatus || "不明")}</p>
+            <p><strong>更新者：</strong>${escapeHtml(item.updatedBy || "不明")}</p>
+            <p><strong>変更内容：</strong></p>
+            ${
+              logs.length
+                ? `<ul>${logs.map(log => `<li>${escapeHtml(log)}</li>`).join("")}</ul>`
+                : "<p>変更内容の記録なし</p>"
+            }
+          </article>
+        `;
+      }).join("");
+
+    } catch (error) {
+      historyList.textContent = "履歴取得エラー：" + error.message;
     }
   }
 
@@ -164,27 +221,19 @@ export async function initializeProgram(container) {
     message.textContent = "保存中...";
 
     try {
-      const token = await getToken();
-
-      const response = await fetch(API_URL, {
+      const result = await requestJSON(API_URL, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
       });
 
-      const result = await response.json();
-
-      if (!response.ok || result.success !== true || result.saved !== true) {
-        throw new Error("保存に失敗しました。");
-      }
-
       message.textContent =
-        "保存しました。最終更新：" + result.updatedAt;
+        "保存しました。更新日時：" + result.updatedAt;
 
       await loadData();
+      await loadHistory();
 
     } catch (error) {
       message.textContent = "保存エラー：" + error.message;
@@ -198,10 +247,21 @@ export async function initializeProgram(container) {
 
     try {
       await loadData();
+      await loadHistory();
     } catch (error) {
       message.textContent = "再読み込みエラー：" + error.message;
     } finally {
       reloadButton.disabled = false;
     }
   });
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
 }
