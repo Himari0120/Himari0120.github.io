@@ -54,13 +54,20 @@ export async function initializeProgram(container) {
       <div class="status-card">
         <h3>更新履歴</h3>
         <p>最新100件の保存記録を表示します。</p>
+
+        <button type="button" id="export-history-button">
+          更新履歴をJSON保存
+        </button>
+
         <div id="history-list">履歴を読み込み中...</div>
       </div>
 
       <div class="status-card">
         <h3>管理上のルール</h3>
         <ul>
-          ${MANAGEMENT_RULES.map(rule => `<li>${escapeHtml(rule)}</li>`).join("")}
+          ${MANAGEMENT_RULES.map(rule =>
+            `<li>${escapeHtml(rule)}</li>`
+          ).join("")}
         </ul>
       </div>
     </section>
@@ -72,6 +79,9 @@ export async function initializeProgram(container) {
   const saveButton = container.querySelector("#save-button");
   const reloadButton = container.querySelector("#reload-button");
   const historyList = container.querySelector("#history-list");
+  const exportHistoryButton = container.querySelector(
+    "#export-history-button"
+  );
 
   const devVersion = container.querySelector("#dev-version");
   const publicVersion = container.querySelector("#public-version");
@@ -90,6 +100,7 @@ export async function initializeProgram(container) {
 
     await loadData();
     await loadHistory();
+
   } catch (error) {
     connection.textContent = "接続エラー：" + error.message;
     historyList.textContent = "履歴を取得できませんでした。";
@@ -99,6 +110,7 @@ export async function initializeProgram(container) {
     if (!user) {
       throw new Error("ログインが確認できません");
     }
+
     return await user.getIdToken();
   }
 
@@ -133,19 +145,24 @@ export async function initializeProgram(container) {
     if (result.configured && result.data) {
       devVersion.value = result.data.devVersion || "";
       publicVersion.value = result.data.publicVersion || "";
+
       changeLog.value = Array.isArray(result.data.changeLog)
         ? result.data.changeLog.join("\n")
         : "";
-      integrityStatus.value = result.data.integrityStatus || "未確認";
+
+      integrityStatus.value =
+        result.data.integrityStatus || "未確認";
 
       message.textContent =
         "登録情報を読み込みました。最終更新：" +
         (result.data.updatedAt || "不明");
+
     } else {
       devVersion.value = "";
       publicVersion.value = "";
       changeLog.value = "";
       integrityStatus.value = "未確認";
+
       message.textContent = "まだ登録情報はありません。";
     }
   }
@@ -156,7 +173,8 @@ export async function initializeProgram(container) {
     try {
       const result = await requestJSON(HISTORY_URL);
 
-      if (!Array.isArray(result.history) || result.history.length === 0) {
+      if (!Array.isArray(result.history) ||
+          result.history.length === 0) {
         historyList.textContent = "更新履歴はまだありません。";
         return;
       }
@@ -169,15 +187,34 @@ export async function initializeProgram(container) {
         return `
           <article class="status-card" style="margin-top:12px;">
             <h4>更新記録 ${index + 1}</h4>
-            <p><strong>更新日時：</strong>${escapeHtml(item.updatedAt || "不明")}</p>
-            <p><strong>開発バージョン：</strong>${escapeHtml(item.devVersion || "不明")}</p>
-            <p><strong>公開バージョン：</strong>${escapeHtml(item.publicVersion || "不明")}</p>
-            <p><strong>ファイル整合性：</strong>${escapeHtml(item.integrityStatus || "不明")}</p>
-            <p><strong>更新者：</strong>${escapeHtml(item.updatedBy || "不明")}</p>
+
+            <p><strong>更新日時：</strong>
+              ${escapeHtml(item.updatedAt || "不明")}
+            </p>
+
+            <p><strong>開発バージョン：</strong>
+              ${escapeHtml(item.devVersion || "不明")}
+            </p>
+
+            <p><strong>公開バージョン：</strong>
+              ${escapeHtml(item.publicVersion || "不明")}
+            </p>
+
+            <p><strong>ファイル整合性：</strong>
+              ${escapeHtml(item.integrityStatus || "不明")}
+            </p>
+
+            <p><strong>更新者：</strong>
+              ${escapeHtml(item.updatedBy || "不明")}
+            </p>
+
             <p><strong>変更内容：</strong></p>
+
             ${
               logs.length
-                ? `<ul>${logs.map(log => `<li>${escapeHtml(log)}</li>`).join("")}</ul>`
+                ? `<ul>${logs.map(log =>
+                    `<li>${escapeHtml(log)}</li>`
+                  ).join("")}</ul>`
                 : "<p>変更内容の記録なし</p>"
             }
           </article>
@@ -185,7 +222,8 @@ export async function initializeProgram(container) {
       }).join("");
 
     } catch (error) {
-      historyList.textContent = "履歴取得エラー：" + error.message;
+      historyList.textContent =
+        "履歴取得エラー：" + error.message;
     }
   }
 
@@ -199,7 +237,10 @@ export async function initializeProgram(container) {
       .map(item => item.trim())
       .filter(Boolean);
 
-    if (logs.length > 30 || logs.some(item => item.length > 500)) {
+    if (
+      logs.length > 30 ||
+      logs.some(item => item.length > 500)
+    ) {
       message.textContent =
         "変更履歴は30項目以内、1項目500文字以内にしてください。";
       return;
@@ -236,7 +277,9 @@ export async function initializeProgram(container) {
       await loadHistory();
 
     } catch (error) {
-      message.textContent = "保存エラー：" + error.message;
+      message.textContent =
+        "保存エラー：" + error.message;
+
     } finally {
       saveButton.disabled = false;
     }
@@ -248,10 +291,60 @@ export async function initializeProgram(container) {
     try {
       await loadData();
       await loadHistory();
+
     } catch (error) {
-      message.textContent = "再読み込みエラー：" + error.message;
+      message.textContent =
+        "再読み込みエラー：" + error.message;
+
     } finally {
       reloadButton.disabled = false;
+    }
+  });
+
+  exportHistoryButton.addEventListener("click", async () => {
+    exportHistoryButton.disabled = true;
+    message.textContent = "JSONバックアップを作成中...";
+
+    try {
+      const result = await requestJSON(HISTORY_URL);
+
+      if (!Array.isArray(result.history)) {
+        throw new Error("履歴データが正しくありません");
+      }
+
+      const backup = {
+        exportedAt: new Date().toISOString(),
+        count: result.history.length,
+        history: result.history
+      };
+
+      const blob = new Blob(
+        [JSON.stringify(backup, null, 2)],
+        { type: "application/json;charset=utf-8" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download =
+        `program-history-${new Date().toISOString().slice(0, 10)}.json`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      message.textContent =
+        `更新履歴 ${result.history.length} 件のJSONバックアップを作成しました。`;
+
+    } catch (error) {
+      message.textContent =
+        "JSON保存エラー：" + error.message;
+
+    } finally {
+      exportHistoryButton.disabled = false;
     }
   });
 }
