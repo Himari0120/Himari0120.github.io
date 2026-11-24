@@ -49,16 +49,15 @@ else{
   const settings=snap.exists()?snap.data():{};
   const links=settings.salesLinks||{};
   purchaseUrl=(links[plan]||{}).purchaseUrl||"";
-  const customText=(settings.noticeTexts||{})[plan]||"";
-  if(customText){
-   const list=document.getElementById("noticeItems");
-   list.replaceChildren();
-   customText.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{
-    const li=document.createElement("li");
-    li.textContent=line;
-    list.appendChild(li);
-   });
-  }
+  const defaults={"trial":"本商品はおトク発見ナビのお試し版です。利用できる機能・登録件数などには制限があります。\n購入・利用の前に、販売ページの商品説明と対応環境をご確認ください。\n利用条件はお試し版に適用される利用規約・ライセンスに従います。\nプログラムの無断配布、第三者への譲渡・転売・再販売は禁止です。\n個別の環境設定、導入代行、カスタマイズ、電話・オンラインでの操作指導は提供していません。\n基本的な使い方は同梱マニュアル・FAQをご確認ください。","standard":"本商品はおトク発見ナビの通常版です。機能・仕様・利用可能な範囲をご確認ください。\n購入前に、販売ページの商品説明と対応環境をご確認ください。\n通常版のプログラム本体・ソースコードの無断配布、第三者への譲渡・転売・再販売は禁止です。\nソースコードの書き換え、プログラムの改造・改変は禁止です。\n公式アップデートは開発者が提供するものに限ります。\n個別の環境設定、導入代行、カスタマイズ、電話・オンラインでの操作指導は提供していません。\n基本的な使い方は同梱マニュアル・FAQをご確認ください。","full":"本商品はおトク発見ナビの完全版です。購入前に販売ページの商品説明と対応環境をご確認ください。\n購入者は、プログラム本体を複製し、第三者へ販売できます。再販売価格は購入者が設定できます。\n再販売権はプログラム本体の複製・販売を認めるものであり、ソースコードの書き換えやプログラムの改造・改変を認めるものではありません。\n購入者自身によるコード変更・改造・公式アップデートはできません。\nコード変更および公式アップデートは開発者のみが行います。\n購入者は、購入時に提供されたプログラムおよびライセンス条件に従って利用・再販売してください。\n個別の環境設定、導入代行、カスタマイズ、電話・オンラインでの操作指導は提供していません。\n基本的な使い方は同梱マニュアル・FAQをご確認ください。"};
+  const customText=(settings.noticeTexts||{})[plan]||defaults[plan]||"";
+  const list=document.getElementById("noticeItems");
+  list.replaceChildren();
+  customText.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{
+   const li=document.createElement("li");
+   li.textContent=line;
+   list.appendChild(li);
+  });
   const u=new URL(purchaseUrl);
   if(u.protocol!=="https:"||!(u.hostname==="note.com"||u.hostname.endsWith(".note.com")))throw new Error("purchase url invalid");
   status.textContent="注意事項を確認し、同意する場合はチェックを入れてください。";
