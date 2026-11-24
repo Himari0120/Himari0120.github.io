@@ -1,6 +1,27 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>おトク発見ナビ お試し版</title><link rel="stylesheet" href="style.css"></head>
-<body data-page="home"><header><div><img id="siteLogo" hidden alt="ロゴ"><h1 id="siteTitle">おトク発見ナビ</h1><p>毎日に、ときめく発見を。</p></div><a id="adminLink" href="admin.html">管理画面</a></header>
+<body>
+<header><div><img id="siteLogo" hidden alt="ロゴ"><h1 id="siteTitle">おトク発見ナビ</h1><p>毎日に、ときめく発見を。</p></div><a id="adminLink" href="#admin">管理画面</a></header>
+<section id="homeView">
 <section class="hero"><img id="heroImage" hidden alt="メイン画像"><h2>お気に入りの商品を見つけよう</h2><p>管理画面から追加した商品がここに表示されます。</p></section>
 <main><input id="search" class="search" type="search" placeholder="商品名・キーワードで検索"><div class="filters"><select id="filterMain"><option value="">すべての大カテゴリー</option></select><select id="filterSub"><option value="">すべての中カテゴリー</option></select><select id="sort"><option value="default">おすすめ順</option><option value="name">名前順</option></select></div><p id="count"></p><div id="productGrid" class="grid"></div></main>
+</section>
+<section id="adminView" hidden>
+<header><h1>お試し版 管理画面</h1><a href="#">メイン画面へ戻る</a></header><main>
+<section class="panel"><h2>商品を追加</h2><form id="productForm">
+<label>商品名<input id="name" required maxlength="120"></label>
+<label>大カテゴリー<select id="mainCategory" required><option value="">選択してください</option></select></label>
+<label>中カテゴリー<select id="subCategory" required><option value="">先に大カテゴリーを選択</option></select></label>
+<label>商品説明<textarea id="description" rows="3"></textarea></label>
+<label>商品画像<input id="imageFile" type="file" accept="image/*"></label><img id="imagePreview" class="preview" hidden alt="画像プレビュー">
+<label>Amazon URL<input id="amazonUrl" type="url" placeholder="https://..."></label>
+<label>楽天市場 URL<input id="rakutenUrl" type="url" placeholder="https://..."></label>
+<label>その他 URL<input id="otherUrl" type="url" placeholder="https://..."></label>
+<label>その他販売店名<input id="otherStoreName"></label>
+<button class="primary" type="submit">商品を追加する</button><p id="formStatus" role="status"></p>
+</form></section>
+<section class="panel"><h2>登録商品</h2><div id="productList"></div></section>
+<section class="panel"><h2>メイン画面の設定</h2><label>サイト名<input id="siteTitleInput" value="おトク発見ナビ"></label><label>メイン画像<input id="heroFile" type="file" accept="image/*"></label><label>ロゴ画像<input id="logoFile" type="file" accept="image/*"></label><button id="saveSettings" class="primary" type="button">設定を反映</button><p id="settingsStatus" role="status"></p></section>
+<section class="panel danger"><h2>全データ消去</h2><p>商品・画像・サイト設定・入力内容をすべて消去し、初期状態に戻します。</p><button id="clearAll" type="button">すべてのデータを消去</button></section>
+</main></section>
 <dialog id="detailDialog"><button id="closeDetail" class="close" type="button">閉じる</button><div id="detailContent"></div></dialog><script type="module" src="app.js"></script></body></html>
