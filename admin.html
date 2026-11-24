@@ -544,9 +544,9 @@ $("saveSettings").addEventListener("click",async()=>{
 
 // NOTE販売リンク設定
 $("saveSalesLinks").addEventListener("click",async()=>{
- if(!currentUser)return;
- const btn=$("saveSalesLinks");
  const status=$("salesLinksStatus");
+ if(!currentUser){status.textContent="管理者ログインが確認できません。いったんログアウトし、管理者アカウントで再ログインしてください。";return;}
+ const btn=$("saveSalesLinks");
  const fields=["trialNoticeUrl","trialPurchaseUrl","standardNoticeUrl","standardPurchaseUrl","fullNoticeUrl","fullPurchaseUrl"];
  const values=Object.fromEntries(fields.map(id=>[id,$(id).value.trim()]));
  for(const [id,value] of Object.entries(values)){
