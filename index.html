@@ -1,0 +1,651 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="おトク発見ナビ。毎日に、ときめく商品や便利なサービスを見つけるセレクトショップです。">
+<title>おトク発見ナビ</title>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L4WMMVCQ5Q"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-L4WMMVCQ5Q');
+</script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;background:#f7f8fc;color:#333}
+header{background:white;padding:16px;border-bottom:1px solid #eee}
+.header-inner{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{text-align:center;flex:1}
+.brand-logo{max-width:150px;max-height:55px;object-fit:contain;display:none;margin:0 auto 5px}
+header h1{margin:0;color:#6755c8;font-size:27px}
+header p{margin:7px 0 0;color:#777;font-size:13px}
+.admin-link{white-space:nowrap;text-decoration:none;background:linear-gradient(100deg,#7963d8,#a18ae9);color:white;padding:10px 16px;border-radius:25px;font-size:13px;font-weight:bold}
+.hero{padding:25px 18px 30px;text-align:center;background:linear-gradient(135deg,#eee9ff,#ffeaf3)}
+.hero-image-wrap{max-width:1100px;margin:0 auto 22px;overflow:hidden;border-radius:20px;box-shadow:0 8px 25px #6755c822}
+.hero-image{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.hero h2{font-size:23px;margin:0 0 10px}
+.hero p{margin:0;font-size:14px;line-height:1.8}
+main{max-width:1000px;margin:25px auto;padding:0 15px}
+.search{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;background:white}
+.category-area{margin:15px 0 20px}
+.category-heading{font-size:14px;font-weight:bold;color:#6655b9;margin:0 0 9px}
+.categories{display:flex;gap:8px;overflow-x:auto;padding:3px 0 12px}
+.categories button,.store-filters button{white-space:nowrap;border:1px solid #e3def2;background:white;border-radius:22px;padding:10px 15px;color:#555;cursor:pointer;font-size:13px}
+.categories button.active,.store-filters button.active{background:#6755c8;color:white;border-color:#6755c8}
+.subcategory-area{display:grid;grid-template-columns:minmax(220px,420px);gap:12px;margin-top:5px}
+.select-box{background:white;border:1px solid #eee7f8;border-radius:13px;padding:12px}
+.select-box label{display:block;font-size:12px;color:#7963d8;font-weight:bold;margin-bottom:7px}
+.select-box select{width:100%;padding:11px;border:1px solid #e5e0ef;border-radius:9px;background:#fff;color:#444;font-size:14px}
+.store-area{margin:20px 0 12px}
+.store-heading{font-size:14px;font-weight:bold;color:#6655b9;margin:0 0 9px}
+.store-filters{display:flex;gap:8px;overflow-x:auto;padding:3px 0 8px}
+.info{display:flex;justify-content:space-between;align-items:center;margin:18px 0 12px;gap:10px}
+.info h2{font-size:18px;margin:0}
+.info select{padding:8px;border:1px solid #ddd;border-radius:8px;background:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.card{background:white;border:1px solid #eeeaf8;border-radius:20px;padding:15px;box-shadow:0 5px 18px #503c120c;overflow:hidden}
+.product-image{height:180px;background:linear-gradient(145deg,#f4efff,#fff0f6);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:65px;margin-bottom:15px;overflow:hidden}
+.product-image img{width:100%;height:100%;object-fit:contain}
+.card h3{font-size:15px;line-height:1.7;margin:10px 0;color:#333;min-height:52px}
+.category{display:inline-block;font-size:11px;color:#7258bd;background:#f2edff;padding:5px 11px;border-radius:20px}
+.store-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.store-tag{font-size:10px;padding:4px 8px;border-radius:15px;background:#f2f0fa;color:#6655b9}
+.description{font-size:13px;color:#888;line-height:1.7;min-height:44px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.description.expanded{display:block;overflow:visible;-webkit-line-clamp:unset}
+.read-more{display:inline-block;margin-top:5px;padding:0;border:0;background:none;color:#7963d8;font-size:12px;font-weight:bold;cursor:pointer}
+.card button,.buy{display:block;width:100%;border:0;border-radius:25px;padding:13px;margin-top:10px;background:linear-gradient(100deg,#7963d8,#a18ae9);color:white;font-size:14px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer}
+.card .favorite{background:#fff0f5;color:#d65b85;border:1px solid #ffe0eb}
+.card .seller-link{background:#fff;border:1px solid #e5def5;color:#6755c8}
+.empty{text-align:center;padding:35px;color:#888;grid-column:1/-1;background:white;border-radius:15px}
+footer{text-align:center;padding:30px 15px;color:#777;font-size:12px;line-height:2}
+.modal-bg{display:none;position:fixed;inset:0;background:#0008;z-index:10;padding:20px;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:white;border-radius:15px;padding:22px;width:100%;max-width:500px;max-height:90vh;overflow:auto}
+.modal h2{font-size:19px}
+.close{float:right;border:0;background:#eee;border-radius:50%;width:32px;height:32px;cursor:pointer}
+.modal-image{width:100%;max-height:220px;object-fit:contain}
+.modal-links{margin-top:18px}
+.modal-links a{margin-top:9px}
+@media(max-width:600px){
+ header{padding:13px 10px}
+ .header-inner{gap:7px}
+ header h1{font-size:20px}
+ header p{font-size:10px;line-height:1.5}
+ .admin-link{font-size:11px;padding:9px 11px}
+ .brand-logo{max-width:100px;max-height:42px}
+ .hero{padding:18px 12px 25px}
+ .hero-image-wrap{border-radius:14px;margin-bottom:18px}
+ .hero h2{font-size:20px}
+ .subcategory-area{gap:8px}
+ .select-box{padding:9px}
+ .select-box select{font-size:12px;padding:10px 5px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .card{padding:10px;border-radius:15px}
+ .product-image{height:140px}
+ .card h3{font-size:13px;min-height:60px}
+ .description{font-size:12px}
+ .info h2{font-size:15px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="header-inner">
+  <div class="brand">
+    <img id="siteLogo" class="brand-logo" alt="おトク発見ナビ ロゴ">
+    <h1 id="siteTitle">おトク発見ナビ</h1>
+    <p>毎日に、ときめく発見を。暮らしを彩る、わたしのセレクトショップ。</p>
+  </div>
+  <a class="admin-link" href="admin.html">⚙ 管理ページ</a>
+</div>
+</header>
+
+<section class="hero">
+  <div class="hero-image-wrap">
+    <img id="heroImage" class="hero-image"
+      src="https://raw.githubusercontent.com/Himari0120/Himari0120.github.io/main/IMG_5222.jpeg"
+      alt="おトク発見ナビのメインビジュアル"
+      fetchpriority="high">
+  </div>
+  <h2>あなたのお気に入りを見つけよう！</h2>
+  <p>毎日の暮らしをちょっと楽しくする商品をセレクトしました。</p>
+</section>
+
+<main>
+<input id="searchInput" class="search" type="search" placeholder="商品名やキーワードで検索">
+
+<div class="category-area">
+  <p class="category-heading">カテゴリーから探す</p>
+  <div id="categories" class="categories"></div>
+
+  <div class="subcategory-area">
+    <div class="select-box">
+      <label for="subCategorySelect">中カテゴリー</label>
+      <select id="subCategorySelect">
+        <option value="">すべて</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="store-area">
+  <p class="store-heading">販売サイトから探す</p>
+  <div id="storeFilters" class="store-filters">
+    <button class="active" data-store="all">すべて</button>
+    <button data-store="Amazon">Amazon</button>
+    <button data-store="Rakuten">楽天市場</button>
+    <button data-store="Other">その他</button>
+  </div>
+</div>
+
+<div class="info">
+  <h2 id="resultTitle">おすすめ商品</h2>
+  <select id="sortSelect">
+    <option value="default">おすすめ順</option>
+    <option value="name">名前順</option>
+  </select>
+</div>
+
+<div id="productGrid" class="grid">
+  <div class="empty">商品を読み込んでいます...</div>
+</div>
+</main>
+
+<div id="modalBg" class="modal-bg">
+  <div class="modal">
+    <button class="close" id="closeModal">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<footer>
+  <p>おトク発見ナビ</p>
+  <p>Amazonのアソシエイトとして、適格販売により収入を得ています。</p>
+  <p>商品情報・価格・在庫などは各販売サイトでご確認ください。</p>
+</footer>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+import {
+  categoryData,
+  getMainCategory
+} from "./js/categories.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyCpsSCuwwawuikXGFpIWjRTPL49_FDamrc",
+ authDomain:"otoku-hakken-navi.firebaseapp.com",
+ projectId:"otoku-hakken-navi",
+ storageBucket:"otoku-hakken-navi.firebasestorage.app",
+ messagingSenderId:"440089037998",
+ appId:"1:440089037998:web:92b0c6d56f948bd629713f",
+ measurementId:"G-L4WMMVCQ5Q"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+let products=[];
+let selectedMain="すべて";
+let selectedSub="";
+let selectedStore="all";
+const favorites=[];
+
+const $=id=>document.getElementById(id);
+const categories=$("categories");
+const grid=$("productGrid");
+const searchInput=$("searchInput");
+const subSelect=$("subCategorySelect");
+
+/* HTML表示用エスケープ */
+function escapeHTML(value){
+ return String(value??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+ })[c]);
+}
+
+/* 商品カテゴリーを2階層に統一 */
+function getProductCategory(product){
+ const main=getMainCategory(product);
+ const rawSub=product.subCategory||"";
+
+ const sub=
+  categoryData[main]&&categoryData[main].includes(rawSub)
+   ?rawSub
+   :"";
+
+ return {
+  main:categoryData[main]?main:"その他",
+  sub
+ };
+}
+
+/* 商品リンク取得 */
+function getLinks(product){
+ const links=[];
+ const amazon=product.amazonUrl||"";
+ const rakuten=product.rakutenUrl||"";
+ const other=product.otherUrl||"";
+
+ if(amazon){
+  links.push({
+   type:"Amazon",
+   label:"Amazonで見る",
+   url:amazon
+  });
+ }
+
+ if(rakuten){
+  links.push({
+   type:"Rakuten",
+   label:"楽天市場で見る",
+   url:rakuten
+  });
+ }
+
+ if(other){
+  links.push({
+   type:"Other",
+   label:(product.otherStoreName||"その他")+"で見る",
+   url:other
+  });
+ }
+
+ /* 旧形式の商品リンクにも対応 */
+ if(links.length===0){
+  const old=product.link||product.url||"";
+
+  if(old){
+   const type=detectStore(old);
+
+   links.push({
+    type,
+    label:
+     type==="Amazon"?"Amazonで見る":
+     type==="Rakuten"?"楽天市場で見る":
+     "販売サイトで見る",
+    url:old
+   });
+  }
+ }
+
+ return links.filter(item=>safeURL(item.url));
+}
+
+/* 安全なURLか確認 */
+function safeURL(value){
+ try{
+  const url=new URL(value);
+  return url.protocol==="https:"||url.protocol==="http:";
+ }catch(e){
+  return false;
+ }
+}
+
+/* 販売サイト判定 */
+function detectStore(url){
+ const value=String(url||"").toLowerCase();
+
+ if(value.includes("amazon."))return "Amazon";
+ if(value.includes("rakuten."))return "Rakuten";
+
+ return "Other";
+}
+
+/* 商品の販売サイト一覧 */
+function getStoreTypes(product){
+ const links=getLinks(product);
+ return [...new Set(links.map(link=>link.type))];
+}
+
+/* 大カテゴリー表示 */
+function makeCategories(){
+ categories.innerHTML="";
+
+ const all=document.createElement("button");
+ all.textContent="すべて";
+ all.className=selectedMain==="すべて"?"active":"";
+
+ all.addEventListener("click",()=>{
+  selectedMain="すべて";
+  selectedSub="";
+  updateCategoryUI();
+ });
+
+ categories.appendChild(all);
+
+ Object.keys(categoryData).forEach(main=>{
+  const button=document.createElement("button");
+
+  button.textContent=main;
+  button.className=selectedMain===main?"active":"";
+
+  button.addEventListener("click",()=>{
+   selectedMain=main;
+   selectedSub="";
+   updateCategoryUI();
+  });
+
+  categories.appendChild(button);
+ });
+}
+
+/* 中カテゴリー表示 */
+function updateSubCategories(){
+ subSelect.innerHTML='<option value="">すべて</option>';
+
+ if(selectedMain!=="すべて"&&categoryData[selectedMain]){
+  categoryData[selectedMain].forEach(sub=>{
+   const option=document.createElement("option");
+
+   option.value=sub;
+   option.textContent=sub;
+
+   subSelect.appendChild(option);
+  });
+ }
+
+ subSelect.value=selectedSub;
+}
+
+/* カテゴリー画面更新 */
+function updateCategoryUI(){
+ makeCategories();
+ updateSubCategories();
+ render();
+}
+
+/* 中カテゴリー変更 */
+subSelect.addEventListener("change",()=>{
+ selectedSub=subSelect.value;
+ render();
+});
+
+/* 販売サイト絞り込み */
+$("storeFilters").addEventListener("click",event=>{
+ const button=event.target.closest("button[data-store]");
+
+ if(!button)return;
+
+ selectedStore=button.dataset.store;
+
+ $("storeFilters").querySelectorAll("button").forEach(b=>{
+  b.classList.toggle("active",b===button);
+ });
+
+ render();
+});
+
+/* 商品一覧表示 */
+function render(){
+ const keyword=searchInput.value.trim().toLowerCase();
+
+ let list=products.filter(product=>{
+  const cat=getProductCategory(product);
+
+  const mainMatch=
+   selectedMain==="すべて"||
+   cat.main===selectedMain;
+
+  const subMatch=
+   !selectedSub||
+   cat.sub===selectedSub;
+
+  /* 古い小カテゴリー情報は検索用にのみ保持 */
+  const searchText=[
+   product.name,
+   product.description,
+   product.category,
+   cat.main,
+   cat.sub,
+   product.detailCategory||"",
+   product.otherStoreName
+  ].join(" ").toLowerCase();
+
+  const keywordMatch=searchText.includes(keyword);
+
+  const stores=getStoreTypes(product);
+
+  const storeMatch=
+   selectedStore==="all"||
+   stores.includes(selectedStore);
+
+  return mainMatch&&subMatch&&keywordMatch&&storeMatch;
+ });
+
+ if($("sortSelect").value==="name"){
+  list.sort((a,b)=>
+   (a.name||"").localeCompare(b.name||"","ja")
+  );
+ }
+
+ $("resultTitle").textContent="おすすめ商品（"+list.length+"件）";
+
+ grid.innerHTML="";
+
+ if(list.length===0){
+  grid.innerHTML=
+   '<div class="empty">該当する商品はありません。別のカテゴリーや販売サイトも見てみてください。</div>';
+  return;
+ }
+
+ list.forEach(product=>{
+  const cat=getProductCategory(product);
+  const links=getLinks(product);
+
+  const card=document.createElement("article");
+  card.className="card";
+
+  const imageHTML=product.image
+   ?`<img src="${escapeHTML(product.image)}" alt="${escapeHTML(product.name)}" loading="lazy">`
+   :escapeHTML(product.icon||"🛍️");
+
+  const categoryText=
+   cat.sub||cat.main||product.category||"その他";
+
+  const tags=[...new Set(links.map(link=>link.type))]
+   .map(type=>{
+    const label=
+     type==="Amazon"?"Amazon":
+     type==="Rakuten"?"楽天市場":
+     (product.otherStoreName||"その他");
+
+    return `<span class="store-tag">${escapeHTML(label)}</span>`;
+   }).join("");
+
+  card.innerHTML=`
+   <div class="product-image">${imageHTML}</div>
+   <div class="category">${escapeHTML(categoryText)}</div>
+   <div class="store-tags">${tags}</div>
+   <h3>${escapeHTML(product.name)}</h3>
+   <p class="description">${escapeHTML(product.description||"")}</p>
+   <button class="read-more" type="button">続きを読む</button>
+   <button class="detail" type="button">詳細を見る</button>
+   <button class="favorite" type="button">♡ お気に入り</button>
+  `;
+
+  const description=card.querySelector(".description");
+  const readMore=card.querySelector(".read-more");
+
+  requestAnimationFrame(()=>{
+   if(description.scrollHeight<=description.clientHeight+1){
+    readMore.style.display="none";
+   }
+  });
+
+  readMore.addEventListener("click",()=>{
+   const expanded=description.classList.toggle("expanded");
+
+   readMore.textContent=expanded?"閉じる":"続きを読む";
+  });
+
+  card.querySelector(".detail").addEventListener("click",()=>{
+   showDetail(product);
+  });
+
+  const favoriteButton=card.querySelector(".favorite");
+
+  if(favorites.includes(product.id)){
+   favoriteButton.textContent="♥ お気に入り登録済み";
+  }
+
+  favoriteButton.addEventListener("click",()=>{
+   const index=favorites.indexOf(product.id);
+
+   if(index===-1){
+    favorites.push(product.id);
+    favoriteButton.textContent="♥ お気に入り登録済み";
+   }else{
+    favorites.splice(index,1);
+    favoriteButton.textContent="♡ お気に入り";
+   }
+  });
+
+  grid.appendChild(card);
+ });
+}
+
+/* 商品詳細表示 */
+function showDetail(product){
+ const cat=getProductCategory(product);
+ const links=getLinks(product);
+
+ const imageHTML=product.image
+  ?`<img class="modal-image" src="${escapeHTML(product.image)}" alt="${escapeHTML(product.name)}">`
+  :"";
+
+ const categoryText=
+  [cat.main,cat.sub].filter(Boolean).join(" ＞ ")||
+  product.category||
+  "その他";
+
+ const linksHTML=links.length
+  ?links.map(link=>`
+    <a class="buy"
+       href="${escapeHTML(link.url)}"
+       data-product-name="${escapeHTML(product.name)}"
+       data-store="${escapeHTML(link.type)}"
+       target="_blank"
+       rel="noopener noreferrer">
+     ${escapeHTML(link.label)}
+    </a>
+   `).join("")
+  :'<p>現在、販売先リンクは登録されていません。</p>';
+
+ $("modalContent").innerHTML=`
+  ${imageHTML}
+  <h2>${escapeHTML(product.name)}</h2>
+  <p>${escapeHTML(product.description||"")}</p>
+  <p>カテゴリー：${escapeHTML(categoryText)}</p>
+  <div class="modal-links">${linksHTML}</div>
+ `;
+
+ $("modalBg").classList.add("show");
+}
+
+/* 商品リンクのクリック計測 */
+document.addEventListener("click",event=>{
+ const link=event.target.closest("a.buy[data-product-name]");
+
+ if(!link)return;
+
+ if(typeof window.gtag==="function"){
+  window.gtag("event","affiliate_click",{
+   product_name:link.dataset.productName,
+   store:link.dataset.store,
+   link_url:link.href,
+   transport_type:"beacon"
+  });
+ }
+});
+
+/* サイト設定読み込み */
+async function loadSiteSettings(){
+ try{
+  const snapshot=await getDoc(doc(db,"siteSettings","main"));
+
+  if(!snapshot.exists())return;
+
+  const settings=snapshot.data();
+
+  if(settings.heroImage&&safeURL(settings.heroImage)){
+   $("heroImage").src=settings.heroImage;
+  }
+
+  if(settings.logoImage&&safeURL(settings.logoImage)){
+   $("siteLogo").src=settings.logoImage;
+   $("siteLogo").style.display="block";
+   $("siteTitle").style.display="none";
+  }
+
+ }catch(error){
+  console.error("サイト設定読み込みエラー:",error);
+ }
+}
+
+/* 商品読み込み */
+async function loadProducts(){
+ try{
+  const snapshot=await getDocs(collection(db,"products"));
+
+  products=snapshot.docs.map(d=>({
+   ...d.data(),
+   id:d.id
+  }));
+
+ }catch(error){
+  console.error("商品読み込みエラー:",error);
+
+  products=[];
+
+  grid.innerHTML=
+   '<div class="empty">商品を読み込めませんでした。時間をおいて再度お試しください。</div>';
+
+  return;
+ }
+
+ updateCategoryUI();
+}
+
+/* 検索・並び替え */
+searchInput.addEventListener("input",render);
+$("sortSelect").addEventListener("change",render);
+
+/* モーダルを閉じる */
+$("closeModal").addEventListener("click",()=>{
+ $("modalBg").classList.remove("show");
+});
+
+$("modalBg").addEventListener("click",event=>{
+ if(event.target.id==="modalBg"){
+  event.currentTarget.classList.remove("show");
+ }
+});
+
+/* 初期読み込み */
+await Promise.all([
+ loadSiteSettings(),
+ loadProducts()
+]);
+
+</script>
+</body>
+</html>
