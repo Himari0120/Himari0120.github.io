@@ -17,7 +17,7 @@
 <p class="small">注意事項ページ ver.1.0 ／ 最終更新日：2026年11月24日</p>
 <div class="notice">
 <h2>ご確認いただきたいこと</h2>
-<ul>
+<ul id="noticeItems">
 <li>本商品はデジタルコンテンツです。購入前に、商品説明・対応内容・利用環境をご自身でご確認ください。</li>
 <li>利用できる機能・利用条件・再配布や再販売の可否は、購入するプランの利用規約およびライセンスに従います。</li>
 <li>完全版の再販売権は、プログラムの複製・第三者への販売を認めるものであり、ソースコードの改変・プログラムの改造・公式アップデートを行う権利を含みません。コード変更と公式アップデートは開発者のみが行います。</li>
@@ -46,8 +46,19 @@ else{
  try{
   const app=initializeApp(firebaseConfig),db=getFirestore(app);
   const snap=await getDoc(doc(db,"siteSettings","main"));
-  const links=snap.exists()?snap.data().salesLinks||{}:{};
+  const settings=snap.exists()?snap.data():{};
+  const links=settings.salesLinks||{};
   purchaseUrl=(links[plan]||{}).purchaseUrl||"";
+  const customText=(settings.noticeTexts||{})[plan]||"";
+  if(customText){
+   const list=document.getElementById("noticeItems");
+   list.replaceChildren();
+   customText.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{
+    const li=document.createElement("li");
+    li.textContent=line;
+    list.appendChild(li);
+   });
+  }
   const u=new URL(purchaseUrl);
   if(u.protocol!=="https:"||!(u.hostname==="note.com"||u.hostname.endsWith(".note.com")))throw new Error("purchase url invalid");
   status.textContent="注意事項を確認し、同意する場合はチェックを入れてください。";
