@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ご購入前の注意事項｜おトク発見ナビ</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:18px;background:#f7f5ff;color:#333;font-family:Arial,"Noto Sans JP",sans-serif;line-height:1.8}main{max-width:760px;margin:24px auto;background:#fff;padding:24px;border-radius:18px;box-shadow:0 4px 20px #0000000c}h1{font-size:23px;color:#705bc7;margin-top:0}h2{font-size:17px;margin-top:25px;color:#5745a5}.lead{color:#666}.notice{padding:15px;background:#faf8ff;border:1px solid #eee7fa;border-radius:12px;margin:14px 0}label{display:flex;gap:10px;align-items:flex-start;margin:22px 0;font-weight:bold}input{margin-top:7px;width:19px;height:19px;flex-shrink:0}button{width:100%;border:0;border-radius:25px;padding:15px;background:#7963d8;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}button:disabled{background:#bbb;cursor:not-allowed}.status{font-size:13px;color:#8b3b3b;min-height:1.5em}.small{font-size:12px;color:#888}@media(max-width:600px){main{padding:18px;margin:5px auto}}
+</style>
+</head>
+<body>
+<main>
+<h1>ご購入前の注意事項</h1>
+<p class="lead">おトク発見ナビをご購入いただく前に、以下の内容をご確認ください。</p>
+<p id="planName"><strong>対象プラン：</strong>読み込み中...</p>
+<p class="small">注意事項ページ ver.1.0 ／ 最終更新日：2026年11月24日</p>
+<div class="notice">
+<h2>ご確認いただきたいこと</h2>
+<ul>
+<li>本商品はデジタルコンテンツです。購入前に、商品説明・対応内容・利用環境をご自身でご確認ください。</li>
+<li>利用できる機能・利用条件・再配布や再販売の可否は、購入するプランの利用規約およびライセンスに従います。</li>
+<li>完全版の再販売権は、プログラムの複製・第三者への販売を認めるものであり、ソースコードの改変・プログラムの改造・公式アップデートを行う権利を含みません。コード変更と公式アップデートは開発者のみが行います。</li>
+<li>購入前に、販売ページに記載された商品内容、動作環境、利用規約、ライセンス条件を必ずご確認ください。</li>
+<li>個別の環境設定・導入代行・カスタマイズ・電話やオンラインでの操作指導は提供していません。基本的な利用方法は同梱マニュアル・FAQをご確認ください。</li>
+<li>ご質問への回答は任意であり、すべての質問への回答や個別サポートをお約束するものではありません。</li>
+</ul>
+<p class="small">このページは購入前の概要です。購入ページおよび商品に付属する対象プランの利用規約・ライセンスが適用されます。概要だけで利用条件の全てを示すものではありません。</p>
+</div>
+<label><input type="checkbox" id="agree"><span>上記の注意事項と、購入ページに記載された商品内容・利用条件を確認し、同意します。</span></label>
+<button id="continue" type="button" disabled>内容を確認して同意し、購入へ進む</button>
+<p id="status" class="status" role="status" aria-live="polite">販売ページ情報を確認しています...</p>
+<p class="small">同意しない場合は、このページを閉じてください。</p>
+</main>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import {getFirestore,doc,getDoc} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyCpsSCuwwawuikXGFpIWjRTPL49_FDamrc",authDomain:"otoku-hakken-navi.firebaseapp.com",projectId:"otoku-hakken-navi",storageBucket:"otoku-hakken-navi.firebasestorage.app",messagingSenderId:"440089037998",appId:"1:440089037998:web:92b0c6d56f948bd629713f",measurementId:"G-L4WMMVCQ5Q"};
+const plans={trial:"お試し版",standard:"通常版",full:"完全版"};
+const plan=new URLSearchParams(location.search).get("plan");
+const agree=document.getElementById("agree"),button=document.getElementById("continue"),status=document.getElementById("status");
+let purchaseUrl="";
+document.getElementById("planName").innerHTML="<strong>対象プラン：</strong>"+(plans[plan]||"不明");
+if(!plans[plan]){status.textContent="プラン指定が正しくありません。販売ページから開き直してください。";}
+else{
+ try{
+  const app=initializeApp(firebaseConfig),db=getFirestore(app);
+  const snap=await getDoc(doc(db,"siteSettings","main"));
+  const links=snap.exists()?snap.data().salesLinks||{}:{};
+  purchaseUrl=(links[plan]||{}).purchaseUrl||"";
+  const u=new URL(purchaseUrl);
+  if(u.protocol!=="https:"||!(u.hostname==="note.com"||u.hostname.endsWith(".note.com")))throw new Error("purchase url invalid");
+  status.textContent="注意事項を確認し、同意する場合はチェックを入れてください。";
+ }catch(e){purchaseUrl="";status.textContent="購入先URLが未設定、または正しくありません。現在は購入へ進めません。販売者に設定をご確認ください。";}
+}
+agree.addEventListener("change",()=>{button.disabled=!(agree.checked&&purchaseUrl);});
+button.addEventListener("click",()=>{if(!agree.checked||!purchaseUrl)return;location.assign(purchaseUrl);});
+</script>
+</body>
+</html>
