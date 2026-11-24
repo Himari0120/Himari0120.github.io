@@ -107,6 +107,20 @@ hr{border:0;border-top:1px solid #eee;margin:25px 0}
  <p id="salesLinksStatus" class="status"></p>
 </div>
 
+<hr>
+<h2>購入前の注意事項編集</h2>
+<div class="panel">
+ <p class="note">各プランの購入案内ページに表示する注意事項を編集できます。1行ごとに1項目入力してください。空欄にすると初期文面を表示します。</p>
+ <label>お試し版の注意事項</label>
+ <textarea id="trialNoticeText" rows="7" placeholder="購入前に確認してほしい内容を入力"></textarea>
+ <label>通常版の注意事項</label>
+ <textarea id="standardNoticeText" rows="7" placeholder="購入前に確認してほしい内容を入力"></textarea>
+ <label>完全版の注意事項</label>
+ <textarea id="fullNoticeText" rows="9" placeholder="購入前に確認してほしい内容を入力"></textarea>
+ <button id="saveNoticeTexts" type="button">注意事項を保存</button>
+ <p id="noticeTextsStatus" class="status"></p>
+</div>
+
 <h2 id="formTitle">商品を追加</h2>
 
 <form id="form">
@@ -460,6 +474,10 @@ async function loadSiteSettings(){
   logoImageUrl=data.logoImage||"";
 
   const sales=data.salesLinks||{};
+  const noticeTexts=data.noticeTexts||{};
+  $("trialNoticeText").value=noticeTexts.trial||"";
+  $("standardNoticeText").value=noticeTexts.standard||"";
+  $("fullNoticeText").value=noticeTexts.full||"";
   $("trialNoticeUrl").value=sales.trial?.noticeUrl||"";
   $("trialPurchaseUrl").value=sales.trial?.purchaseUrl||"";
   $("standardNoticeUrl").value=sales.standard?.noticeUrl||"";
@@ -578,6 +596,28 @@ $("saveSalesLinks").addEventListener("click",async()=>{
  }finally{
   btn.disabled=false;
  }
+});
+
+// 購入前の注意事項保存
+$("saveNoticeTexts").addEventListener("click",async()=>{
+ const status=$("noticeTextsStatus");
+ if(!currentUser){status.textContent="管理者ログインが確認できません。再ログインしてください。";return;}
+ const btn=$("saveNoticeTexts");
+ btn.disabled=true;
+ status.textContent="保存中...";
+ try{
+  await setDoc(doc(db,"siteSettings","main"),{
+   noticeTexts:{
+    trial:$("trialNoticeText").value.trim(),
+    standard:$("standardNoticeText").value.trim(),
+    full:$("fullNoticeText").value.trim()
+   },
+   noticeTextsUpdatedAt:new Date().toISOString()
+  },{merge:true});
+  status.textContent="購入前の注意事項を保存しました。";
+ }catch(e){
+  status.textContent="保存エラー："+e.message;
+ }finally{btn.disabled=false;}
 });
 
 // 商品画像
