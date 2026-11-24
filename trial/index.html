@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>おトク発見ナビ お試し版</title><link rel="stylesheet" href="style.css"></head>
+<body data-page="home"><header><div><img id="siteLogo" hidden alt="ロゴ"><h1 id="siteTitle">おトク発見ナビ</h1><p>毎日に、ときめく発見を。</p></div><a id="adminLink" href="admin.html">管理画面</a></header>
+<section class="hero"><img id="heroImage" hidden alt="メイン画像"><h2>お気に入りの商品を見つけよう</h2><p>管理画面から追加した商品がここに表示されます。</p></section>
+<main><input id="search" class="search" type="search" placeholder="商品名・キーワードで検索"><div class="filters"><select id="filterMain"><option value="">すべての大カテゴリー</option></select><select id="filterSub"><option value="">すべての中カテゴリー</option></select><select id="sort"><option value="default">おすすめ順</option><option value="name">名前順</option></select></div><p id="count"></p><div id="productGrid" class="grid"></div></main>
+<dialog id="detailDialog"><button id="closeDetail" class="close" type="button">閉じる</button><div id="detailContent"></div></dialog><script type="module" src="app.js"></script></body></html>
